@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import TodoListTemplate from './components/TodoListTemplate';
 import TodoItemList from './components/TodoItemList';
 import Search from './components/Search';
-import Filter from './components/Filter';
 
 class App extends Component {
 
@@ -18,33 +17,17 @@ class App extends Component {
     sResult: []
   }
 
-  getVisibleTodos = ( filter ) => {
-    //const {todos, sResult} = this.state;
-
-    switch(filter){
-      case 'SHOW_ALL':
-        console.log('all');
-
-      case 'SHOW_ACTIVE':
-        console.log('active');
-
-      case 'SHOW_COMPLETED':
-        console.log('completed');
-    }
-  }
-
   handleChange = (event)=> {
   var updatedList = this.state.todos;
   var searcjQery = event.target.value.toLowerCase();
 		updatedList = updatedList.filter((item)=>{
       var searchValue = item.text.toLowerCase();
-      return searchValue.indexOf(searcjQery) !==-1;
+      return searchValue.indexOf(searcjQery) !== -1;
     });
     this.setState({
       input: event.target.value,
       sResult: updatedList});
  }
-
 
   handleCreate = () => {
     const { input, todos, sResult } = this.state;
@@ -75,6 +58,7 @@ class App extends Component {
   handleRemove = (id) => {
     const { todos, sResult } = this.state;
     this.setState({
+      //파라미터로 갖고온 아이디 가지고 있지 않는 배열 새로 생성 
       todos: todos.filter(todo => todo.id !== id),
       sResult: todos.filter(todo => todo.id !== id)
     });
@@ -100,6 +84,15 @@ class App extends Component {
     });
   }
   
+  handleFilters(filter){
+    const {todos} = this.state 
+    if(filter === 'show_all')
+      this.setState({sResult : todos});
+    else if(filter === 'show_active')
+      this.setState({sResult : todos.filter(todo => todo.checked === false)})
+    else
+      this.setState({sResult : todos.filter(todo => todo.checked === true)})
+  }
 
   componentWillMount() {
 		this.setState({sResult: this.state.todos})
@@ -107,15 +100,16 @@ class App extends Component {
 
   render() {
     const { input, todos, sResult} = this.state;
-   
+
     const {
       handleChange,
       handleCreate,
       handleKeyPress,
       handleToggle,
-      getVisibleTodos,
-      handleRemove
+      handleRemove,
     } = this;
+
+    const match = filter => () => this.handleFilters(filter)
 
     return (
       <TodoListTemplate 
@@ -128,7 +122,13 @@ class App extends Component {
         />
        )}
        filter={(
-        <Filter onVisible={getVisibleTodos}/>
+        <div>
+                  <a href="#" onClick={match('show_all')}>All</a>
+                  {'  '}
+                  <a href="#" onClick={match('show_active')}>Active</a>
+                  {'  '}
+                  <a href="#" onClick={match('show_completed')}>Completed</a>
+             </div>
        )}
       >
         <TodoItemList todos={sResult} onChange={handleChange} onToggle={handleToggle} onRemove={handleRemove}/>
